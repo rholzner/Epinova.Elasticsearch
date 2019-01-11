@@ -266,6 +266,7 @@
     <Compile Include="Models\Query\Highlight.cs" />
     <Compile Include="Models\Query\Match.cs" />
     <Compile Include="Models\Query\MatchBase.cs" />
+    <Compile Include="Models\Query\MatchBestBet.cs" />
     <Compile Include="Models\Query\MatchMulti.cs" />
     <Compile Include="Models\Query\MatchSimple.cs" />
     <Compile Include="Models\Query\MatchWithBoost.cs" />

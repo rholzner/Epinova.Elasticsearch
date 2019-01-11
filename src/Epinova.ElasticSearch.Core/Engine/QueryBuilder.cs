@@ -24,7 +24,6 @@ namespace Epinova.ElasticSearch.Core.Engine
     internal class QueryBuilder
     {
         private static readonly ILogger Log = LogManager.GetLogger(typeof(SearchEngine));
-        private const int BestBetMultiplier = 10000; //TODO: Expose in config?
         private readonly IBoostingRepository _boostingRepository;
         private readonly IElasticSearchSettings _settings;
         private static readonly string[] ExcludedFields = { DefaultFields.Suggest };
@@ -275,6 +274,8 @@ namespace Epinova.ElasticSearch.Core.Engine
             }
 
             // Best Bets
+            Log.Debug($"UseBestBets: {setup.UseBestBets}");
+
             if (setup.UseBestBets && !String.IsNullOrWhiteSpace(request.Query.SearchText))
             {
                 IEnumerable<string> terms = request.Query.SearchText
@@ -283,16 +284,19 @@ namespace Epinova.ElasticSearch.Core.Engine
 
                 var key = setup.IndexName ?? _settings.GetDefaultIndexName(Language.GetLanguageCode(setup.Language));
 
+                Log.Debug($"BestBets key: {key}");
+
                 if (!Conventions.Indexing.BestBets.TryGetValue(key, out var bestBetsForLanguage))
+                {
+                    Log.Debug("BestBets key not found");
                     return;
+                }
 
                 IEnumerable<BestBet> bestBets = bestBetsForLanguage
                     .Where(b => b.Terms.Any(t => terms.Contains(t)));
 
                 request.Query.Bool.Should.AddRange(
-                    bestBets.Select(_ =>
-                        new MatchWithBoost(
-                            DefaultFields.BestBets, request.Query.SearchText.Trim('*'), BestBetMultiplier, setup.Operator)));
+                    bestBets.Select(_ => new MatchBestBet(request.Query.SearchText.Trim('*'), setup.Operator)));
             }
         }
 
@@ -425,13 +429,14 @@ namespace Epinova.ElasticSearch.Core.Engine
 
             AppendDefaultFilters(request.Query, setup.Type);
 
-
-            if (request.Query.Bool.Should.Count > 0)
+            var queryShouldCount = request.Query.Bool.Should.Count(x => !(x is MatchBestBet));
+            if (queryShouldCount > 0)
                 request.Query.Bool.MinimumNumberShouldMatch = 1;
             else
                 request.Query.Bool.MinimumNumberShouldMatch = null;
 
-            if (request.PostFilter.Bool.Should.Count > 0)
+            var postShouldCount = request.PostFilter.Bool.Should.Count(x => !(x is MatchBestBet));
+            if (postShouldCount > 0)
                 request.PostFilter.Bool.MinimumNumberShouldMatch = 1;
             else
                 request.PostFilter.Bool.MinimumNumberShouldMatch = null;

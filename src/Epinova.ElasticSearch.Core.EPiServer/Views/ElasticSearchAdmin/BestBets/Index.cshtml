@@ -174,7 +174,7 @@
                             contentName: {
                                 label: "@Html.TranslateWithPath("contentId", localizationPath)",
                                 formatter: function (url, object) {
-                                    return '<a class="epi-visibleLink" target="_blank" href="@(Model.GetEditUrlPrefix(lang))' + object.contentId + object.contentProvider + '">' + object.contentName + '</a> (' + object.contentId + ')';
+                                    return '<a class="epi-visibleLink" target="_blank" href="@(Model.GetEditUrlPrefix(lang))' + object.contentId + '">' + object.contentName + '</a> (' + object.contentId + ')';
                                 }
                             },
                             url: {
