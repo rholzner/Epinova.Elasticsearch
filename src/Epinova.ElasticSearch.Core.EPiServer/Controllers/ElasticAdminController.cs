@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using Epinova.ElasticSearch.Core.EPiServer.Controllers.Abstractions;
 using EPiServer.DataAbstraction;
 using Microsoft.Azure.Search;
+using Microsoft.Azure.Search.Models;
 
 namespace Epinova.ElasticSearch.Core.EPiServer.Controllers
 {
@@ -57,11 +58,17 @@ namespace Epinova.ElasticSearch.Core.EPiServer.Controllers
         [Authorize(Roles = "ElasticsearchAdmins")]
         public ActionResult AddNewIndex()
         {
-            //if (Core.Server.Info.Version.Major < 5)
-            //    throw new Exception("Elasticsearch version 5 or higher required");
-
-
-
+            foreach (var item in GetIndexNames())
+            {
+                if (!_serviceClient.Indexes.Exists(item))
+                {
+                    var definition = new Index()
+                    {
+                        Name = item
+                    };
+                    _serviceClient.Indexes.Create(definition);
+                }
+            }
             return RedirectToAction("Index");
         }
 
