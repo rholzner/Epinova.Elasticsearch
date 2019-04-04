@@ -230,6 +230,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\CampaignSearchProvider.cs" />
     <Compile Include="Providers\ProductSearchProvider.cs" />
+    <None Include="app.config" />
     <None Include="Epinova.ElasticSearch.Core.EPiServer.Commerce.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
